@@ -1,2 +1,5 @@
 test*
 *-LoRA*
+*.local.*
+__pycache__
+.DS_Store
