@@ -16,3 +16,5 @@ datasets>=3.4.1
 huggingface_hub
 hf_transfer
 unsloth  # installed with --no-deps
+wandb
+tensorboard
