@@ -1,6 +1,8 @@
 test*
 *-LoRA*
+!evaluations/**/*-LoRA*
 *.local.*
 __pycache__
 .DS_Store
 data
+.ipynb_checkpoints
