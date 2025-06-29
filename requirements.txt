@@ -19,3 +19,4 @@ unsloth  # installed with --no-deps
 wandb
 tensorboard
 fire
+vastai-sdk

@@ -73,7 +73,7 @@ def main(
     else:
         print("Data already exists. Skipping download.")
 
-    # Load and convert data to Huggingface format
+    # Load and convert the data to Huggingface format
     # Source: https://github.com/Wikidepia/indonesian_datasets/blob/master/question-answering/squad/convert_huggingface.py
     with open(data_path, 'r') as f:
         content = json.load(f)
@@ -103,10 +103,10 @@ def main(
     # Create Huggingface dataset
     data = Dataset.from_list(hf_data)
 
-    # Load the tokenizer
+    # Load tokenizer
     tokenizer = AutoTokenizer.from_pretrained(lora_dir)
 
-    # Load the model
+    # Load model
     if model_type == 'lora':
         model = AutoPeftModelForCausalLM.from_pretrained(lora_dir, device_map='auto')
     else:
@@ -116,7 +116,7 @@ def main(
 
     # Evaluate the model
     metric = evaluate.load('squad')
-    results = eval(metric, data, model, tokenizer, device, test_size=10)
+    results = eval(metric, data, model, tokenizer, device, test_size=test_size)
     pprint(results)
 
     # Save the evaluation results
@@ -134,7 +134,7 @@ def main(
     # Stop vast.ai instance
     if vastai_api_key and vastai_instance_id:
         vast_sdk = VastAI(api_key=vastai_api_key)
-        vast_sdk.start_instance(ID=vastai_instance_id)
+        vast_sdk.stop_instance(id=vastai_instance_id)
 
 if __name__ == '__main__':
     fire.Fire(main)
