@@ -20,3 +20,4 @@ wandb
 tensorboard
 fire
 vastai-sdk
+py-cpuinfo

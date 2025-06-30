@@ -1,7 +1,7 @@
 {
-    "exact_match": 0.0,
-    "f1": 11.559255015137369,
-    "duration": 44.12876892089844,
+    "exact_match": 20.0,
+    "f1": 37.96507936507937,
+    "duration": 29.316590785980225,
     "devices": [
         "NVIDIA GeForce RTX 3060",
         "NVIDIA GeForce RTX 3060"
