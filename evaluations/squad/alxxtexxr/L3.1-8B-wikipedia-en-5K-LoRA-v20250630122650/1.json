@@ -1,0 +1,8 @@
+{
+    "exact_match": 100.0,
+    "f1": 100.0,
+    "duration": 4.7555224895477295,
+    "devices": [
+        "NVIDIA RTX A4000"
+    ]
+}
