@@ -8,7 +8,7 @@ from trl import SFTTrainer
 from transformers import TrainingArguments
 
 def main(
-    lang, # 'en' | 'id'
+    lang, # 'en' | 'id' | 'es'
     task, # 'wikipedia' | 'gsm8k'
     seed = 69,
 
@@ -36,8 +36,9 @@ def main(
     hf_data_id = hf_data_id_map[task]
     
     hf_data_dir_map = {
-        'wikipedia_id': '20231101.id',
         'wikipedia_en': '20231101.en',
+        'wikipedia_id': '20231101.id',
+        'wikipedia_es': '20231101.es',
         'gsm8k_en': 'main',
     }
     hf_data_dir = hf_data_dir_map[task + '_' + lang]
