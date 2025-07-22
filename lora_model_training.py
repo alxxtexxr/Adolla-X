@@ -6,6 +6,7 @@ from datetime import datetime
 from datasets import load_dataset, Dataset
 from trl import SFTTrainer
 from transformers import TrainingArguments
+from vastai_sdk import VastAI
 
 def main(
     lang, # 'en' | 'id' | 'es'
@@ -28,6 +29,10 @@ def main(
     
     # Resume training configuration
     resume_model_id = None,
+
+    # vast.ai configuration
+    vastai_api_key = None,
+    vastai_instance_id = None,
 ):
     hf_data_id_map = {
         'wikipedia': 'wikimedia/wikipedia',
@@ -165,6 +170,11 @@ Solve the following math problem step by step.
         ),
     )
     trainer_stats = trainer.train(resume_from_checkpoint=resume_from_checkpoint)
+
+    # Stop vast.ai instance
+    if vastai_api_key and vastai_instance_id:
+        vast_sdk = VastAI(api_key=vastai_api_key)
+        vast_sdk.stop_instance(id=vastai_instance_id)
 
 if __name__ == '__main__':
     fire.Fire(main)
