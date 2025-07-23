@@ -6,3 +6,4 @@ __pycache__
 .DS_Store
 data
 .ipynb_checkpoints
+unsloth_compiled_cache
