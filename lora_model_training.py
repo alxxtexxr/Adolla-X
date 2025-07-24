@@ -1,5 +1,6 @@
 from unsloth import FastLanguageModel, UnslothTrainer, UnslothTrainingArguments, is_bf16_supported
 import fire
+import subprocess
 import torch
 from itertools import islice
 from datetime import datetime
@@ -33,6 +34,9 @@ def main(
     # vast.ai configuration
     vastai_api_key = None,
     vastai_instance_id = None,
+
+    # Runpod configuration
+    runpod_pod_id = None,
 ):
     hf_data_id_map = {
         'wikipedia': 'wikimedia/wikipedia',
@@ -175,6 +179,17 @@ Solve the following math problem step by step.
     if vastai_api_key and vastai_instance_id:
         vast_sdk = VastAI(api_key=vastai_api_key)
         vast_sdk.stop_instance(id=vastai_instance_id)
+
+    # Stop Runpod pod
+    if runpod_pod_id:
+        result = subprocess.run(
+            ['runpodctl', 'stop', 'pod', runpod_pod_id], 
+            capture_output=True, 
+            text=True,
+        )
+        print("Return code:", result.returncode)
+        print("STDOUT:", result.stdout)
+        print("STDERR:", result.stderr)
 
 if __name__ == '__main__':
     fire.Fire(main)
