@@ -43,14 +43,7 @@ def main(
         'gsm8k': 'openai/gsm8k',
     }
     hf_data_id = hf_data_id_map[task]
-    
-    hf_data_dir_map = {
-        'wikipedia_en': '20231101.en',
-        'wikipedia_id': '20231101.id',
-        'wikipedia_es': '20231101.es',
-        'gsm8k_en': 'main',
-    }
-    hf_data_dir = hf_data_dir_map[task + '_' + lang]
+    hf_data_dir = f'20231101.{lang}' if task == 'wikipedia' else 'main'
 
     resume_from_checkpoint = bool(resume_model_id)
     if resume_from_checkpoint:
