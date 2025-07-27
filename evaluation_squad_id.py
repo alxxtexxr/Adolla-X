@@ -17,11 +17,8 @@ def main(
     model_type, # 'base' | 'lora' | 'nero'
     test_size,
     data_path = 'data/train-SQuAD-id.json',
-    dtype = None, # None for auto detection. Float16 for Tesla T4, V100, Bfloat16 for Ampere+
-    load_in_4bit = True, # Use 4bit quantization to reduce memory usage. Can be False.
     vastai_api_key = None,
     vastai_instance_id = None,
-    seed = 69,
 ):
     # Set device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
