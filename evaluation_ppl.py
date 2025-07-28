@@ -143,7 +143,7 @@ Solve the following math problem step by step.
     os.makedirs(save_dir, exist_ok=True)
     save_path = os.path.join(save_dir, f'{task}_{lang}_{test_size}.json')
     with open(save_path, 'w') as f:
-        json.dump({ 'ppl': ppl, 'avg_nll': avg_nll }, f)
+        json.dump({ 'ppl': ppl.item(), 'avg_nll': avg_nll.item() }, f)
     print("Evaluation results are saved to:", save_path)
 
 if __name__ == '__main__':
