@@ -1,4 +1,6 @@
+import os
 import fire
+import json
 import torch
 from datasets import load_dataset
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -7,6 +9,7 @@ from tqdm import tqdm
 from pprint import pprint
 
 def compute_ppl(model, encodings, max_seq_length, stride=512, return_avg_nll=False):
+    device = next(model.parameters()).device  # Get model device
     seq_length = encodings.input_ids.size(1)
 
     nll_sum = 0.0
@@ -15,22 +18,18 @@ def compute_ppl(model, encodings, max_seq_length, stride=512, return_avg_nll=Fal
     for begin_loc in tqdm(range(0, seq_length, stride)):
         end_loc = min(begin_loc + max_seq_length, seq_length)
         trg_len = end_loc - prev_end_loc  # may be different from stride on last loop
-        input_ids = encodings.input_ids[:, begin_loc:end_loc] #.to(device)
+
+        input_ids = encodings.input_ids[:, begin_loc:end_loc].to(device)
         target_ids = input_ids.clone()
         target_ids[:, :-trg_len] = -100
 
         with torch.no_grad():
             outputs = model(input_ids, labels=target_ids)
-
-            # loss is calculated using CrossEntropyLoss which averages over valid labels
-            # N.B. the model only calculates loss over trg_len - 1 labels, because it internally shifts the labels
-            # to the left by 1.
             neg_log_likelihood = outputs.loss
 
-        # Accumulate the total negative log-likelihood and the total number of tokens
-        num_valid_tokens = (target_ids != -100).sum().item()  # number of valid tokens in target_ids
+        num_valid_tokens = (target_ids != -100).sum().item()
         batch_size = target_ids.size(0)
-        num_loss_tokens = num_valid_tokens - batch_size  # subtract batch_size due to internal label shift
+        num_loss_tokens = num_valid_tokens - batch_size
         nll_sum += neg_log_likelihood * num_loss_tokens
         n_tokens += num_loss_tokens
 
@@ -38,26 +37,11 @@ def compute_ppl(model, encodings, max_seq_length, stride=512, return_avg_nll=Fal
         if end_loc == seq_length:
             break
 
-    avg_nll = nll_sum / n_tokens  # average negative log-likelihood per token
+    avg_nll = nll_sum / n_tokens
     ppl = torch.exp(avg_nll)
     if return_avg_nll:
         return ppl, avg_nll
     return ppl
-
-def format_gsm8k_prompts(examples, eos_token):
-    gsm8k_prompt = """### Instruction:
-Solve the following math problem step by step.
-
-### Question: 
-{question}
-
-### Answer: 
-{answer}""" + eos_token
-    
-    return {'text': [gsm8k_prompt.format(question=question, answer=answer) for question, answer in zip(examples['question'], examples['answer'])]}
-
-def format_prompts(examples, eos_token):
-    return {'text': [example + eos_token for example in examples['text']]}
 
 def count_total_tokens(dataset, tokenizer):
     total_tokens = 0
@@ -112,6 +96,24 @@ def main(
     dataset = load_dataset(hf_data_id, data_dir=hf_data_dir, split=hf_data_split)
     eos_token = tokenizer.eos_token
 
+    def format_gsm8k_prompts(examples):
+        gsm8k_prompt = """### Instruction:
+Solve the following math problem step by step.
+
+### Question: 
+{question}
+    
+### Answer: 
+{answer}""" + eos_token
+        
+        return {'text': [
+            gsm8k_prompt.format(question=question, answer=answer) 
+            for question, answer in zip(examples['question'], examples['answer'])
+        ]}
+    
+    def format_prompts(examples):
+        return {'text': [example + eos_token for example in examples['text']]}
+    
     if task == 'gsm8k':
         dataset = dataset.map(format_gsm8k_prompts, batched=True)
     else:
@@ -134,7 +136,7 @@ def main(
         save_dir = os.path.join('evaluations', lora_config.base_model_name_or_path)
     model.eval()
 
-    ppl, avg_nll = compute_ppl(base_model, encodings, max_seq_length, return_avg_nll=True)
+    ppl, avg_nll = compute_ppl(model, encodings, max_seq_length, return_avg_nll=True)
     print("Avgerage Negative Log-Likelihood (NLL):", avg_nll.item())
     print("Perplexity (PPL):", ppl.item())
 
