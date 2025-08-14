@@ -2,6 +2,7 @@ test*
 *-LoRA*
 !evaluations/**/*-LoRA*
 *.local.*
+*.legacy.*
 __pycache__
 .DS_Store
 data
